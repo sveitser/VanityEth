@@ -1,12 +1,23 @@
 const crypto = require('crypto');
+const bip39 = require('bip39');
+const hdWallet = require('ethereumjs-wallet/hdkey')
+
 var ethUtils = require('ethereumjs-util');
 var ERRORS = {
     invalidHex: "Invalid hex input"
 }
 var getRandomWallet = function() {
-    var randbytes = crypto.randomBytes(32);
-    var address = '0x' + ethUtils.privateToAddress(randbytes).toString('hex');
-    return { address: address, privKey: randbytes.toString('hex') }
+    
+    const mnemonic = bip39.generateMnemonic();
+    const seed = bip39.mnemonicToSeed(mnemonic);
+    const HdKey = hdWallet.fromMasterSeed(seed);
+    const node = HdKey.derivePath("m/44'/60'/0'/0/0");
+    
+    const address = node.getWallet().getChecksumAddressString();
+
+    //var randbytes = crypto.randomBytes(32);
+    //var address = '0x' + ethUtils.privateToAddress(randbytes).toString('hex');
+    return { address: address, mnemonic: mnemonic}
 }
 var isValidHex = function(hex) {
     if (!hex.length) return true;
